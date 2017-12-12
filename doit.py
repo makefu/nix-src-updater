@@ -96,11 +96,17 @@ def fetchGit(attrs):
     return json.loads(check_output(call,
         stderr=DEVNULL).decode())["sha256"]
 
-def fetchUrl(url):
+def fetchUrl(attrs):
+    url = attrs['urls'][0]
+    call = ["nix-prefetch-url", url]
     log.info(f"Fetching {url}")
 
+    # TODO: we assume that if postFetch is set then the package will be unpacked
+    if attrs["postFetch"]:
+        log.debug(f"Unpacking {url}")
+        call.append("--unpack")
+
     out = None if (log.getEffectiveLevel() == logging.DEBUG) else DEVNULL
-    call = ["nix-prefetch-url", url]
     log.debug(f"{call} - {out}")
     return check_output(call,stderr=out).decode().strip()
 
@@ -207,15 +213,12 @@ def main():
 
     matcher = re.compile(f'(version|rev)\s*=\s*"{version}";\s*(#.*)?$')
     replaceLast(loc,locline,version,new_version,matcher)
-    # TODO: if is git
+
+    attrs = neval(f"{expr}.src.drvAttrs")
     if is_git:
-        attrs = neval(f"{expr}.src.drvAttrs")
-        url = attrs['url']
-        rev = attrs['rev']
         new_hash = fetchGit(attrs)
     else:
-        url = neval(f"{expr}.src.drvAttrs.urls")[0]
-        new_hash = fetchUrl(url)
+        new_hash = fetchUrl(attrs)
 
     log.info(f"new hash for {expr} is {new_hash}")
 
