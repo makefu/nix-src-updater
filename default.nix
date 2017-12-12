@@ -7,6 +7,7 @@ with pkgs.python3Packages; buildPythonPackage { name = "updater-env";
     pkgs.nix
     docopt
     requests
+    pkgs.nix-prefetch-scripts
   ];
 
 src = ./.; }
