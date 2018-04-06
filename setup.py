@@ -14,10 +14,11 @@ setup(
     author='makefu',
     author_email='pypi@syntax-fehler.de',
     install_requires = [ 'docopt', 'requests' ],
-    packages=['nix_src_updater'],
+    packages=['nix_src_updater', 'nix_src_updater.gen_skeleton' ],
     entry_points={
         'console_scripts' : [
-            'nix-src-updater = nix_src_updater.cli:allowAllMain'
+            'nix-src-updater = nix_src_updater.cli:allowAllMain',
+            'nix-gen-skeleton = nix_src_updater.gen_skeleton.cli:main'
             ]
         },
 

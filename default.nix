@@ -3,7 +3,7 @@ with import <nixpkgs> {};
 with pkgs.python3Packages; buildPythonPackage { name = "updater-env";
 
   propagatedBuildInputs = [
-    ((import ./pythonix) { inherit pkgs;})
+    pythonix
     pkgs.nix
     docopt
     requests

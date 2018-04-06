@@ -114,7 +114,7 @@ def githubTags(url):
     # github archive, TODO releases
 
     match = re.search("//github.com/(?P<owner>[^/]+)/(?P<repo>.+)\.git$",url) or \
-            re.search("//github.com/(?P<owner>\w+)/(?P<repo>\w+)/archive/(?P<version>.*)\.(?P<extension>zip|tar\..*)$",url)
+            re.search("//github.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/archive/(?P<version>.*)\.(?P<extension>zip|tar\..*)$",url)
     if match:
         log.debug(match)
         owner = match.group('owner')
@@ -130,8 +130,9 @@ def pypiRelease(url):
         log.debug(match)
         name = match.group('name')
         version = match.group('version')
-        tags = requests.get(f"https://pypi.python.org/pypi/{name}/json").json()['releases']
-        return [parse_version(tag) for tag in tags.keys() if (type(parse_version(tag)) == Version)]
+        v = requests.get(f"https://pypi.python.org/pypi/{name}/json").json()['info']['version']
+        # lets just return the latest version
+        return [parse_version(v)]
 
 
 
@@ -141,6 +142,7 @@ def guessNewVersion(name,current_version,urls,force_rehash=False):
 
     possibleServices = [ githubTags, pypiRelease]
     for srv in possibleServices:
+        log.debug(f"checking via {srv}")
         try:
             versions = srv(url)
         except Exception as e:
@@ -176,11 +178,11 @@ def main():
     setLOL(args['--lol'])
 
     log.info(f"This system: {system}")
-    log.info(f"NIX_PATH: {nix_path}")
+    log.debug(f"NIX_PATH: {nix_path}")
 
     try:
         nv = neval(f"builtins.parseDrvName {expr}.name")
-        name,version = nv['name'],parse_version(nv['version'])
+        name,version = nv['name'],parse_version(nv['version'].split('-')[-1])
         loc,locline = neval(f"{expr}.meta.position").split(":")
         locline = int(locline)
         log.info(f"File for {name}-{version} is {loc}:{locline}")
