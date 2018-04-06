@@ -5,7 +5,7 @@ Tries to find the latest version of the derivation source and tries to fix the s
 # Install
 
 ```
-git clone https://github.com/Mic92/pythonix/ # TODO: pin to ref
 nix-shell
-python doit.py  python2Packages.cairosvg -I 'nixpkgs=~/nixpkgs'
+nix-src-updater --help
+nix-gen-skeleton --help
 ```
